@@ -21,16 +21,16 @@ export default {
 .my-name {
   text-align: center;
   margin: 20px;
-  padding: 20px;
+  padding: 40px;
 }
 
 .my-name h2 {
   color: #2f107c;
-  margin-bottom: 10px;
+  margin-bottom: 20px;
 }
 
 .my-name p {
   color: #4f0d78;
-  margin: 5px 0;
+  margin: 10px 0;
 }
 </style>
