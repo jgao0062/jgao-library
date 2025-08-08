@@ -25,12 +25,12 @@ export default {
 }
 
 .my-name h2 {
-  color: #ffffff;
+  color: #2f107c;
   margin-bottom: 10px;
 }
 
 .my-name p {
-  color: #ffffff;
+  color: #4f0d78;
   margin: 5px 0;
 }
 </style>
