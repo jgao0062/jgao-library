@@ -9,11 +9,19 @@
             <div class="row g-3 mb-3">
               <div class="col-12 col-sm-6">
                 <label for="username" class="form-label">Username *</label>
-                <input type="text" class="form-control" id="username" required v-model="formData.username">
+                <input type="text" class="form-control" id="username"
+                @blur="() => validateName(true)"
+                @input="() => validateName(false)"
+                v-model="formData.username">
+                <div v-if="errors.username" class="text-danger mt-1">{{ errors.username }}</div>
               </div>
               <div class="col-12 col-sm-6">
                 <label for="password" class="form-label">Password *</label>
-                <input type="password" class="form-control" id="password" required minlength="4" maxlength="10" v-model="formData.password">
+                <input type="password" class="form-control" id="password"
+                  @blur="() => validatePassword(true)"
+                  @input="() => validatePassword(false)"
+                  v-model="formData.password" />
+                <div v-if="errors.password" class="text-danger">{{ errors.password }}</div>
               </div>
             </div>
 
@@ -21,25 +29,37 @@
             <div class="row g-3 mb-3">
               <div class="col-12 col-sm-6 d-flex align-items-end">
                 <div class="form-check">
-                  <input type="checkbox" class="form-check-input" id="isAustralian" required v-model="formData.isAustralian">
+                  <input type="checkbox" class="form-check-input" id="isAustralian"
+                  @change="() => validateResident(true)"
+                  v-model="formData.isAustralian">
                   <label class="form-check-label" for="isAustralian">Australian Resident? *</label>
                 </div>
+                <div v-if="errors.resident" class="text-danger mt-1 ms-2">{{ errors.resident }}</div>
               </div>
               <div class="col-12 col-sm-6">
                 <label for="gender" class="form-label">Gender *</label>
-                <select class="form-select" id="gender" required v-model="formData.gender">
+                <select class="form-select" id="gender"
+                @blur="() => validateGender(true)"
+                @change="() => validateGender(false)"
+                v-model="formData.gender">
                   <option value="">Please select</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
                   <option value="other">Other</option>
                 </select>
+                <div v-if="errors.gender" class="text-danger mt-1">{{ errors.gender }}</div>
               </div>
             </div>
 
             <!-- Reason Textarea -->
             <div class="mb-4">
               <label for="reason" class="form-label">Reason for joining *</label>
-              <textarea class="form-control" id="reason" rows="3" required minlength="10" maxlength="200" v-model="formData.reason" placeholder="Please tell us why you want to join (10-200 characters)"></textarea>
+              <textarea class="form-control" id="reason" rows="3"
+              @blur="() => validateReason(true)"
+              @input="() => validateReason(false)"
+              v-model="formData.reason"
+              placeholder="Please tell us why you want to join (10-200 characters)"></textarea>
+              <div v-if="errors.reason" class="text-danger mt-1">{{ errors.reason }}</div>
             </div>
 
             <!-- Buttons -->
@@ -53,37 +73,25 @@
     </div>
   </div>
 
-  <!-- Cards Section -->
+  <!-- DataTable Section -->
   <div class="container-fluid px-3 px-md-4" v-if="submittedCards.length">
     <div class="row justify-content-center mt-5">
       <div class="col-12">
-        <h2 class="text-center mb-4">Submitted Information</h2>
-        <div class="cards-container">
-          <div v-for="(card, index) in submittedCards" :key="index" class="card-item">
-            <div class="card">
-              <div class="card-header">
-                <h5 class="mb-0">User Information #{{ index + 1 }}</h5>
-              </div>
-              <ul class="list-group list-group-flush">
-                <li class="list-group-item">
-                  <strong>Username:</strong> {{ card.username }}
-                </li>
-                <li class="list-group-item">
-                  <strong>Password:</strong> {{ card.password }}
-                </li>
-                <li class="list-group-item">
-                  <strong>Australian Resident:</strong> {{ card.isAustralian ? 'Yes' : 'No' }}
-                </li>
-                <li class="list-group-item">
-                  <strong>Gender:</strong> {{ card.gender }}
-                </li>
-                <li class="list-group-item">
-                  <strong>Reason:</strong> {{ card.reason }}
-                </li>
-              </ul>
-            </div>
-          </div>
-        </div>
+        <DataTable :value="submittedCards"
+                   tableStyle="min-width: 50rem"
+                   stripedRows
+                   showGridlines
+                   class="custom-datatable">
+          <Column field="username" header="Username" sortable></Column>
+          <Column field="password" header="Password" sortable></Column>
+          <Column field="isAustralian" header="Australian Resident" sortable>
+            <template #body="slotProps">
+              {{ slotProps.data.isAustralian ? 'true' : 'false' }}
+            </template>
+          </Column>
+          <Column field="gender" header="Gender" sortable></Column>
+          <Column field="reason" header="Reason" sortable></Column>
+        </DataTable>
       </div>
     </div>
   </div>
@@ -91,6 +99,8 @@
 
 <script setup>
 import { ref } from 'vue';
+import DataTable from 'primevue/datatable';
+import Column from 'primevue/column';
 
 const formData = ref({
   username: '',
@@ -102,10 +112,28 @@ const formData = ref({
 
 const submittedCards = ref([]);
 
+const errors = ref({
+  username: null,
+  password: null,
+  resident: null,
+  gender: null,
+  reason: null
+});
+
 const submitForm = () => {
-  submittedCards.value.push({
-    ...formData.value
-  });
+  // 验证所有字段
+  validateName(true);
+  validatePassword(true);
+  validateResident(true);
+  validateGender(true);
+  validateReason(true);
+
+  // 检查是否有错误
+  if (!errors.value.username && !errors.value.password &&
+      !errors.value.resident && !errors.value.gender && !errors.value.reason) {
+    submittedCards.value.push({...formData.value});
+    clearForm();
+  }
 };
 
 const clearForm = () => {
@@ -116,6 +144,72 @@ const clearForm = () => {
     reason: '',
     gender: ''
   };
+  // 清除所有错误信息
+  errors.value = {
+    username: null,
+    password: null,
+    resident: null,
+    gender: null,
+    reason: null
+  };
+};
+
+const validateName = (blur) => {
+  if (formData.value.username.length < 3) {
+    if (blur) errors.value.username = 'Name must be at least 3 characters long.';
+  } else {
+    errors.value.username = null;
+  }
+};
+
+const validatePassword = (blur) => {
+  const password = formData.value.password;
+  const minLength = 8;
+  const hasUppercase = /[A-Z]/.test(password);
+  const hasLowercase = /[a-z]/.test(password);
+  const hasNumber = /\d/.test(password);
+  const hasSpecialChar = /[!@#$%^&*(),.?":{}|<>]/.test(password);
+
+  if (password.length < minLength) {
+    if (blur) errors.value.password = `Password must be at least ${minLength} characters long.`;
+  } else if (!hasUppercase) {
+    if (blur) errors.value.password = "Password must contain at least one uppercase letter.";
+  } else if (!hasLowercase) {
+    if (blur) errors.value.password = "Password must contain at least one lowercase letter.";
+  } else if (!hasNumber) {
+    if (blur) errors.value.password = "Password must contain at least one number.";
+  } else if (!hasSpecialChar) {
+    if (blur) errors.value.password = "Password must contain at least one special character.";
+  } else {
+    errors.value.password = null;
+  }
+};
+
+const validateResident = (blur) => {
+  if (!formData.value.isAustralian) {
+    if (blur) errors.value.resident = 'You must be an Australian resident to proceed.';
+  } else {
+    errors.value.resident = null;
+  }
+};
+
+const validateGender = (blur) => {
+  if (!formData.value.gender || formData.value.gender === '') {
+    if (blur) errors.value.gender = 'Please select your gender.';
+  } else {
+    errors.value.gender = null;
+  }
+};
+
+const validateReason = (blur) => {
+  const reason = formData.value.reason.trim();
+  if (reason.length < 10) {
+    if (blur) errors.value.reason = 'Reason must be at least 10 characters long.';
+  } else if (reason.length > 200) {
+    if (blur) errors.value.reason = 'Reason must not exceed 200 characters.';
+  } else {
+    errors.value.reason = null;
+  }
 };
 </script>
 
@@ -163,6 +257,12 @@ const clearForm = () => {
   border-color: #198754;
 }
 
+/* Error message styling */
+.text-danger {
+  font-size: 0.875rem;
+  font-weight: 500;
+}
+
 /* Placeholder styling */
 ::placeholder {
   color: #6c757d;
@@ -195,6 +295,52 @@ const clearForm = () => {
 .btn-secondary:hover {
   background-color: #545b62;
   border-color: #545b62;
+}
+
+/* DataTable styling */
+.custom-datatable {
+  border-radius: 12px;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+  margin-top: 2rem;
+  border: 1px solid #e0e0e0;
+}
+
+.custom-datatable :deep(.p-datatable-table) {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.custom-datatable :deep(.p-datatable-thead > tr > th) {
+  background-color: #275FDA !important;
+  color: white !important;
+  border: 1px solid #1e4eb8 !important;
+  font-weight: 600;
+  padding: 1rem;
+  text-align: center;
+}
+
+.custom-datatable :deep(.p-datatable-tbody > tr > td) {
+  padding: 0.75rem 1rem;
+  text-align: center;
+  border: 1px solid #e0e0e0;
+  background-color: white;
+}
+
+.custom-datatable :deep(.p-datatable-tbody > tr:nth-child(odd) > td) {
+  background-color: #f8f9fa;
+}
+
+.custom-datatable :deep(.p-datatable-tbody > tr:hover > td) {
+  background-color: #e3f2fd !important;
+}
+
+.custom-datatable :deep(.p-sortable-column) {
+  cursor: pointer;
+}
+
+.custom-datatable :deep(.p-sortable-column:hover) {
+  background-color: #1e4eb8 !important;
 }
 
 /* Cards container responsive layout */
@@ -244,18 +390,13 @@ const clearForm = () => {
     border-radius: 8px;
   }
 
-  .cards-container {
-    grid-template-columns: 1fr;
-    padding: 0;
+  .custom-datatable {
+    font-size: 0.875rem;
   }
 
-  .card-item .card {
-    border-radius: 8px;
-  }
-
-  .card-header {
-    border-radius: 8px 8px 0 0;
-    padding: 0.75rem;
+  .custom-datatable .p-datatable-thead > tr > th,
+  .custom-datatable .p-datatable-tbody > tr > td {
+    padding: 0.5rem;
   }
 
   .btn {
@@ -266,15 +407,15 @@ const clearForm = () => {
 
 /* Tablet adjustments */
 @media (min-width: 577px) and (max-width: 768px) {
-  .cards-container {
-    grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  .custom-datatable {
+    font-size: 0.9rem;
   }
 }
 
 /* Large screens */
 @media (min-width: 1200px) {
-  .cards-container {
-    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+  .custom-datatable {
+    font-size: 1rem;
   }
 }
 
@@ -289,7 +430,7 @@ const clearForm = () => {
 }
 
 /* Animation for form submission */
-.card-item {
+.custom-datatable {
   animation: slideIn 0.5s ease-out;
 }
 
