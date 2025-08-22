@@ -8,12 +8,12 @@
             <!-- Username and Password Row -->
             <div class="row g-3 mb-3">
               <div class="col-12 col-sm-6">
-                <label for="username" class="form-label">Username</label>
-                <input type="text" class="form-control" id="username" v-model="formData.username">
+                <label for="username" class="form-label">Username *</label>
+                <input type="text" class="form-control" id="username" required v-model="formData.username">
               </div>
               <div class="col-12 col-sm-6">
-                <label for="password" class="form-label">Password</label>
-                <input type="password" class="form-control" id="password" v-model="formData.password">
+                <label for="password" class="form-label">Password *</label>
+                <input type="password" class="form-control" id="password" required minlength="4" maxlength="10" v-model="formData.password">
               </div>
             </div>
 
@@ -21,13 +21,13 @@
             <div class="row g-3 mb-3">
               <div class="col-12 col-sm-6 d-flex align-items-end">
                 <div class="form-check">
-                  <input type="checkbox" class="form-check-input" id="isAustralian" v-model="formData.isAustralian">
-                  <label class="form-check-label" for="isAustralian">Australian Resident?</label>
+                  <input type="checkbox" class="form-check-input" id="isAustralian" required v-model="formData.isAustralian">
+                  <label class="form-check-label" for="isAustralian">Australian Resident? *</label>
                 </div>
               </div>
               <div class="col-12 col-sm-6">
-                <label for="gender" class="form-label">Gender</label>
-                <select class="form-select" id="gender" v-model="formData.gender">
+                <label for="gender" class="form-label">Gender *</label>
+                <select class="form-select" id="gender" required v-model="formData.gender">
                   <option value="">Please select</option>
                   <option value="male">Male</option>
                   <option value="female">Female</option>
@@ -38,8 +38,8 @@
 
             <!-- Reason Textarea -->
             <div class="mb-4">
-              <label for="reason" class="form-label">Reason for joining</label>
-              <textarea class="form-control" id="reason" rows="3" v-model="formData.reason"></textarea>
+              <label for="reason" class="form-label">Reason for joining *</label>
+              <textarea class="form-control" id="reason" rows="3" required minlength="10" maxlength="200" v-model="formData.reason" placeholder="Please tell us why you want to join (10-200 characters)"></textarea>
             </div>
 
             <!-- Buttons -->
@@ -141,6 +141,32 @@ const clearForm = () => {
 .form-select:focus {
   border-color: #275FDA;
   box-shadow: 0 0 0 0.2rem rgba(39, 95, 218, 0.15);
+}
+
+/* Form validation styles */
+.form-control:invalid,
+.form-select:invalid {
+  border-color: #dc3545;
+  box-shadow: 0 0 0 0.2rem rgba(220, 53, 69, 0.15);
+}
+
+.form-control:valid,
+.form-select:valid {
+  border-color: #198754;
+}
+
+.form-check-input:invalid {
+  border-color: #dc3545;
+}
+
+.form-check-input:valid {
+  border-color: #198754;
+}
+
+/* Placeholder styling */
+::placeholder {
+  color: #6c757d;
+  opacity: 0.7;
 }
 
 /* Button responsive styling */
