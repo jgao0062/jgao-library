@@ -1,7 +1,7 @@
 <template>
   <nav class="navbar navbar-expand-lg navbar-dark bg-primary">
     <div class="container">
-      <router-link class="navbar-brand" to="/">📚 Library App</router-link>
+      <router-link class="navbar-brand" to="/"> Library App</router-link>
 
       <button
         class="navbar-toggler"
@@ -25,6 +25,12 @@
         <ul class="navbar-nav">
           <li class="nav-item" v-if="!authStore.isAuthenticated.value">
             <router-link class="nav-link" to="/login">Login</router-link>
+          </li>
+          <li class="nav-item">
+            <router-link class="nav-link" to="/FireRegister">Firebase Register</router-link>
+          </li>
+          <li class="nav-item" v-if="!authStore.isAuthenticated.value">
+            <router-link class="nav-link" to="/FireLogin">Firebase Login</router-link>
           </li>
           <li class="nav-item" v-if="authStore.isAuthenticated.value">
             <span class="navbar-text me-3">
