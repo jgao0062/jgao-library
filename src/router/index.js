@@ -5,7 +5,7 @@ import LoginView from '../views/LoginView.vue'
 import AccessDeniedView from '../views/AccessDeniedView.vue'
 import FirebaseSigninView from '../views/FirebaseSigninView.vue'
 import FirebaseRegisterView from '../views/FirebaseRegisterView.vue'
-import { useAuthStore } from '../stores/auth'
+import AddBookView from '../views/AddBookView.vue'
 
 const routes = [
   {
@@ -38,31 +38,17 @@ const routes = [
     path: '/FireRegister',
     name: 'FireRegister',
     component: FirebaseRegisterView
+  },
+  {
+    path: '/addbook',
+    name: 'AddBook',
+    component: AddBookView
   }
 ]
 
 const router = createRouter({
   history: createWebHistory(),
   routes
-})
-
-// Navigation guard for authentication
-router.beforeEach((to, from, next) => {
-  const authStore = useAuthStore()
-
-  // Check if the route requires authentication
-  if (to.meta.requiresAuth) {
-    if (authStore.isAuthenticated.value) {
-      // User is authenticated, allow access
-      next()
-    } else {
-      // User is not authenticated, redirect to access denied page
-      next('/access-denied')
-    }
-  } else {
-    // Route doesn't require authentication, allow access
-    next()
-  }
 })
 
 export default router

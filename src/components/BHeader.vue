@@ -20,6 +20,9 @@
           <li class="nav-item" v-if="authStore.isAuthenticated.value">
             <router-link class="nav-link" to="/about">About (Members)</router-link>
           </li>
+          <li class="nav-item">
+            <router-link class="nav-link" to="/addbook" active-class="active">Add Book</router-link>
+          </li>
         </ul>
 
         <ul class="navbar-nav">

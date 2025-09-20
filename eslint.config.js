@@ -18,6 +18,10 @@ export default defineConfig([
         ...globals.browser,
       },
     },
+    rules: {
+      // Disable character encoding warnings for Chinese characters
+      'no-irregular-whitespace': 'off',
+    },
   },
 
   js.configs.recommended,
