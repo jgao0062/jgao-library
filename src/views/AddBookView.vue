@@ -1,17 +1,28 @@
 <template>
   <div>
-    <h1>Add Book</h1>
+    <h1>Add Book (with Capitalization)</h1>
+    <p style="text-align: center; color: #666; margin-bottom: 20px;">
+      Books will be automatically capitalized when saved to Firestore via Firebase Function
+    </p>
+
     <form @submit.prevent="addBook">
       <div>
         <label for="isbn">ISBN: </label>
         <input type="text" v-model="isbn" id="isbn" required />
       </div>
       <div>
-        <label for="name">Name: </label>
+        <label for="name">Book Name: </label>
         <input type="text" v-model="name" id="name" required />
       </div>
-      <button type="submit">Add Book</button>
+      <button type="submit" :disabled="loading">
+        {{ loading ? 'Adding...' : 'Add Book' }}
+      </button>
     </form>
+
+    <!-- Success/Error Message -->
+    <div v-if="message" :class="message.includes('Error') ? 'error-message' : 'success-message'">
+      {{ message }}
+    </div>
 
     <!-- BookList component loaded directly under AddBook page -->
     <BookList />
@@ -20,8 +31,7 @@
 
 <script>
 import { ref } from 'vue'
-import db from '../firebase/init.js'
-import { collection, addDoc } from 'firebase/firestore'
+import axios from 'axios'
 import BookList from '../components/BookList.vue'
 
 export default {
@@ -32,31 +42,44 @@ export default {
   setup() {
     const isbn = ref('')
     const name = ref('')
+    const loading = ref(false)
+    const message = ref('')
 
     const addBook = async () => {
       try {
+        loading.value = true
+        message.value = ''
+
         const isbnNumber = Number(isbn.value)
         if (isNaN(isbnNumber)) {
           alert('ISBN must be a valid number')
           return
         }
 
-        await addDoc(collection(db, 'books'), {
+        // Call Firebase Function to add book with capitalized name
+        const response = await axios.post('https://us-central1-week7-jing-f99a5.cloudfunctions.net/addBookCapitalized', {
           isbn: isbnNumber,
           name: name.value
         })
 
-        isbn.value = ''
-        name.value = ''
-        alert('Book added successfully!')
+        if (response.data.success) {
+          isbn.value = ''
+          name.value = ''
+          message.value = `Book added successfully! Original: "${response.data.book.originalName}" → Capitalized: "${response.data.book.name}"`
+        }
       } catch (error) {
         console.error('Error adding book: ', error)
+        message.value = 'Error adding book: ' + (error.response?.data || error.message)
+      } finally {
+        loading.value = false
       }
     }
 
     return {
       isbn,
       name,
+      loading,
+      message,
       addBook
     }
   }
@@ -127,5 +150,28 @@ button:hover {
 
 button:active {
   background-color: #004085;
+}
+
+button:disabled {
+  background-color: #6c757d;
+  cursor: not-allowed;
+}
+
+.success-message {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 15px;
+  border: 1px solid #c3e6cb;
+}
+
+.error-message {
+  background-color: #f8d7da;
+  color: #721c24;
+  padding: 10px;
+  border-radius: 4px;
+  margin-top: 15px;
+  border: 1px solid #f5c6cb;
 }
 </style>
