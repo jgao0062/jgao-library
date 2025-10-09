@@ -57,7 +57,7 @@ export default {
         }
 
         // Call Firebase Function to add book with capitalized name
-        const response = await axios.post('https://us-central1-week7-jing-f99a5.cloudfunctions.net/addBookCapitalized', {
+        const response = await axios.post('https://addbookcapitalized-mc4qwou5va-uc.a.run.app', {
           isbn: isbnNumber,
           name: name.value
         })
