@@ -24,15 +24,16 @@ const cors = require("cors")({origin: true});
 // this will be the maximum concurrent request count.
 setGlobalOptions({ maxInstances: 10 });
 
-// Initialize Firebase Admin
-admin.initializeApp();
-
 // Create and deploy your first functions
 // https://firebase.google.com/docs/functions/get-started
 
-exports.countBooks = onRequest((req, res) => {
+exports.countBooks = onRequest({invoker: "public"}, (req, res) => {
   cors(req, res, async () => {
     try {
+      // Initialize Firebase Admin if not already initialized
+      if (!admin.apps.length) {
+        admin.initializeApp();
+      }
       const booksCollection = admin.firestore().collection("books");
       const snapshot = await booksCollection.get();
       const count = snapshot.size;
@@ -45,9 +46,14 @@ exports.countBooks = onRequest((req, res) => {
   });
 });
 
-exports.addBookCapitalized = onRequest((req, res) => {
+exports.addBookCapitalized = onRequest({invoker: "public"}, (req, res) => {
   cors(req, res, async () => {
     try {
+      // Initialize Firebase Admin if not already initialized
+      if (!admin.apps.length) {
+        admin.initializeApp();
+      }
+
       if (req.method !== 'POST') {
         res.status(405).send('Method Not Allowed');
         return;
@@ -83,6 +89,36 @@ exports.addBookCapitalized = onRequest((req, res) => {
     } catch (error) {
       console.error("Error adding book:", error.message);
       res.status(500).send("Error adding book");
+    }
+  });
+});
+
+exports.getAllBooks = onRequest({invoker: "public"}, (req, res) => {
+  cors(req, res, async () => {
+    try {
+      // Initialize Firebase Admin if not already initialized
+      if (!admin.apps.length) {
+        admin.initializeApp();
+      }
+      const booksCollection = admin.firestore().collection("books");
+      const snapshot = await booksCollection.get();
+
+      const books = [];
+      snapshot.forEach(doc => {
+        books.push({
+          id: doc.id,
+          ...doc.data()
+        });
+      });
+
+      res.status(200).send({
+        success: true,
+        count: books.length,
+        books: books
+      });
+    } catch (error) {
+      console.error("Error getting all books:", error.message);
+      res.status(500).send("Error getting all books");
     }
   });
 });
